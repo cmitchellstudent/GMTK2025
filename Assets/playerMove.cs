@@ -1,18 +1,23 @@
 
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class playerMove : MonoBehaviour
 {
     public GameObject player;
+    public GameObject lookAt;
     InputAction moveActions;
     InputAction lookActions;
-    public int camSpeed;
-    public int moveSpeed;
-    
+    public float camSpeed;
+    public float moveSpeed;
+
+    private float targetPitch;
+    private float rotateVelocity;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        Cursor.lockState = CursorLockMode.Locked;
         moveActions = InputSystem.actions.FindAction("Move");
         lookActions = InputSystem.actions.FindAction("Look");
     }
@@ -27,13 +32,39 @@ public class playerMove : MonoBehaviour
         position += new Vector3(forward.x, 0, forward.z) * (moveInput.y * (Time.deltaTime * moveSpeed));
         position += new Vector3(left.x, 0, left.z) * (moveInput.x * (Time.deltaTime * moveSpeed));
         player.transform.position = position;
+    }
 
+    private void LateUpdate()
+    {
+        CameraRotation();
+    }
+
+    private void CameraRotation()
+    {
+        //TODO: MAKE THIS BETTER/CONTROLLER COMPATIBLE
         Vector2 lookInput = lookActions.ReadValue<Vector2>();
-        player.transform.Rotate(new Vector3(lookInput.y,lookInput.x,0) * (Time.deltaTime * camSpeed), Space.Self);
-        Vector3 angles = player.transform.rotation.eulerAngles;
-        angles.z = 0;
-        player.transform.rotation = Quaternion.Euler(angles);
+        Debug.Log(lookInput);
+        if (lookInput.sqrMagnitude > 0)
+        {
+            //targetPitch += lookInput.y * camSpeed;
+            rotateVelocity = lookInput.x * camSpeed;
+            //targetPitch = ClampAngle(targetPitch, -90, 90);
+            //transform.rotation = Quaternion.Euler(targetPitch,0 ,0);
+            transform.Rotate(Vector3.up * (rotateVelocity * 5f));
 
+            if (Math.Abs(lookInput.y) > 1f){
+                Vector3 lookAtposition = lookAt.transform.position;
+                lookAtposition.y += lookInput.y * camSpeed;
+                lookAtposition.y = Mathf.Clamp(lookAtposition.y, -15f, 15f);
+                lookAt.transform.position = lookAtposition;
+            }
+        }
+    }
+    private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
+    {
+        if (lfAngle < -360f) lfAngle += 360f;
+        if (lfAngle > 360f) lfAngle -= 360f;
+        return Mathf.Clamp(lfAngle, lfMin, lfMax);
     }
     /*
     void OnDrawGizmos()
