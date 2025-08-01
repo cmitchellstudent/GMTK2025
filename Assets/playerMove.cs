@@ -1,5 +1,6 @@
 
 using System;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,14 +8,15 @@ public class playerMove : MonoBehaviour
 {
     public PauseManager PM;
     private CharacterController player;
-    public GameObject lookAt;
+    public CinemachineCamera cam;
     InputAction moveActions;
     InputAction lookActions;
     private float camSpeed;
     public float moveSpeed;
 
-    private float targetPitch;
-    private float rotateVelocity;
+    private float xRotation;
+    private float yRotation;
+    public Transform orientation;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -46,24 +48,17 @@ public class playerMove : MonoBehaviour
 
     private void CameraRotation()
     {
-        //TODO: MAKE THIS BETTER/CONTROLLER COMPATIBLE
+        //TODO: MAKE THIS CONTROLLER COMPATIBLE
         Vector2 lookInput = lookActions.ReadValue<Vector2>();
-        //Debug.Log(lookInput);
-        if (lookInput.sqrMagnitude > 0)
-        {
-            //targetPitch += lookInput.y * camSpeed;
-            rotateVelocity = lookInput.x * camSpeed;
-            //targetPitch = ClampAngle(targetPitch, -90, 90);
-            //transform.rotation = Quaternion.Euler(targetPitch,0 ,0);
-            transform.Rotate(Vector3.up * (rotateVelocity * 5f));
+        float mouseX = lookInput.x * Time.deltaTime * camSpeed;
+        float mouseY = lookInput.y * Time.deltaTime * camSpeed;
 
-            if (Math.Abs(lookInput.y) > 1f){
-                Vector3 lookAtposition = lookAt.transform.position;
-                lookAtposition.y += lookInput.y * camSpeed;
-                lookAtposition.y = Mathf.Clamp(lookAtposition.y, -15f, 15f);
-                lookAt.transform.position = lookAtposition;
-            }
-        }
+        yRotation += mouseX;
+        xRotation -= mouseY;
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+        
+        transform.rotation = Quaternion.Euler(xRotation,yRotation,0);
+        orientation.rotation = Quaternion.Euler(0, yRotation, 0);
     }
     private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
     {
@@ -71,23 +66,4 @@ public class playerMove : MonoBehaviour
         if (lfAngle > 360f) lfAngle -= 360f;
         return Mathf.Clamp(lfAngle, lfMin, lfMax);
     }
-    /*
-    void OnDrawGizmos()
-    {
-        Vector3 direction = Vector3.forward;
-        Gizmos.color = Color.red;
-
-        Vector3 start = transform.position;
-        Vector3 end = start + direction.normalized * 3f;
-
-        // Draw main line (shaft)
-        Gizmos.DrawLine(start, end);
-        // Draw arrowhead
-        Vector3 right = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 150, 0) * Vector3.forward;
-        Vector3 left  = Quaternion.LookRotation(direction) * Quaternion.Euler(0, -150, 0) * Vector3.forward;
-        float headLength = 3f * 0.25f;
-        Gizmos.DrawLine(end, end + right * headLength);
-        Gizmos.DrawLine(end, end + left * headLength);
-    }
-    */
 }
