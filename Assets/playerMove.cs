@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 public class playerMove : MonoBehaviour
 {
     public PauseManager PM;
-    public GameObject player;
+    private CharacterController player;
     public GameObject lookAt;
     InputAction moveActions;
     InputAction lookActions;
@@ -18,6 +18,7 @@ public class playerMove : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        player = GetComponent<CharacterController>();
         moveActions = InputSystem.actions.FindAction("Move");
         lookActions = InputSystem.actions.FindAction("Look");
     }
@@ -30,10 +31,12 @@ public class playerMove : MonoBehaviour
         Vector2 moveInput = moveActions.ReadValue<Vector2>();
         var forward = player.transform.forward;
         var left = Vector3.Cross(Vector3.up, forward);
-        var position = player.transform.position;
-        position += new Vector3(forward.x, 0, forward.z) * (moveInput.y * (Time.deltaTime * moveSpeed));
-        position += new Vector3(left.x, 0, left.z) * (moveInput.x * (Time.deltaTime * moveSpeed));
-        player.transform.position = position;
+        
+        Vector3 move = new Vector3(left.x, 0, left.z) * moveInput.x +
+                       new Vector3(forward.x, 0, forward.z) * moveInput.y;
+        player.Move(move * (moveSpeed * Time.deltaTime));
+        //le gravity
+        player.Move(Vector3.down);
     }
 
     private void LateUpdate()
