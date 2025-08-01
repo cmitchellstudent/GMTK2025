@@ -5,11 +5,12 @@ using UnityEngine.InputSystem;
 
 public class playerMove : MonoBehaviour
 {
+    public PauseManager PM;
     public GameObject player;
     public GameObject lookAt;
     InputAction moveActions;
     InputAction lookActions;
-    public float camSpeed;
+    private float camSpeed;
     public float moveSpeed;
 
     private float targetPitch;
@@ -17,7 +18,6 @@ public class playerMove : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
         moveActions = InputSystem.actions.FindAction("Move");
         lookActions = InputSystem.actions.FindAction("Look");
     }
@@ -25,6 +25,8 @@ public class playerMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        camSpeed = PlayerPrefs.GetFloat("Mouse Sens");
+        
         Vector2 moveInput = moveActions.ReadValue<Vector2>();
         var forward = player.transform.forward;
         var left = Vector3.Cross(Vector3.up, forward);
@@ -43,7 +45,7 @@ public class playerMove : MonoBehaviour
     {
         //TODO: MAKE THIS BETTER/CONTROLLER COMPATIBLE
         Vector2 lookInput = lookActions.ReadValue<Vector2>();
-        Debug.Log(lookInput);
+        //Debug.Log(lookInput);
         if (lookInput.sqrMagnitude > 0)
         {
             //targetPitch += lookInput.y * camSpeed;
