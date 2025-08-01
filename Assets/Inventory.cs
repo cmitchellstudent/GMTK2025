@@ -24,12 +24,40 @@ public class Inventory : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Debug.Log(_pickUpBuffer.Equals(null));
-        if (_interactAction.WasPressedThisFrame() && !_pickUpBuffer.Equals(null))
+        if (_interactAction.WasPressedThisFrame())
         {
-            GameObject clone = _pickUpBuffer;
-            
+            if (InventoryHand.transform.childCount > 0)
+            {
+                Drop();
+            }
+            else if (!_pickUpBuffer.Equals(null) &&
+                     InventoryHand.transform.childCount == 0)
+            {
+                Pickup();
+            }
+            else
+            {
+                
+            }
         }
+    }
+
+    void Pickup()
+    {
+        _pickUpBuffer.GetComponent<Rigidbody>().isKinematic = true;
+        _pickUpBuffer.transform.parent = InventoryHand.transform;
+        _pickUpBuffer.transform.position = InventoryHand.transform.position;
+        if (_pickUpBuffer.name.Contains("Key"))
+        {
+            _pickUpBuffer.transform.localRotation = Quaternion.Euler(0,90,0);
+        }
+    }
+
+    void Drop()
+    {
+        Transform held = InventoryHand.transform.GetChild(0);
+        held.parent = null;
+        held.gameObject.GetComponent<Rigidbody>().isKinematic = false;
     }
 
     private void OnTriggerEnter(Collider other)

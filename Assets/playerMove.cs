@@ -38,7 +38,7 @@ public class playerMove : MonoBehaviour
                        new Vector3(forward.x, 0, forward.z) * moveInput.y;
         player.Move(move * (moveSpeed * Time.deltaTime));
         //le gravity
-        player.Move(Vector3.down);
+        player.Move(Vector3.down * (10 * Time.deltaTime));
     }
 
     private void LateUpdate()
@@ -50,8 +50,8 @@ public class playerMove : MonoBehaviour
     {
         //TODO: MAKE THIS CONTROLLER COMPATIBLE
         Vector2 lookInput = lookActions.ReadValue<Vector2>();
-        float mouseX = lookInput.x * Time.deltaTime * camSpeed;
-        float mouseY = lookInput.y * Time.deltaTime * camSpeed;
+        float mouseX = lookInput.x * camSpeed * Time.deltaTime;
+        float mouseY = lookInput.y * camSpeed * Time.deltaTime;
 
         yRotation += mouseX;
         xRotation -= mouseY;
@@ -60,10 +60,5 @@ public class playerMove : MonoBehaviour
         transform.rotation = Quaternion.Euler(xRotation,yRotation,0);
         orientation.rotation = Quaternion.Euler(0, yRotation, 0);
     }
-    private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
-    {
-        if (lfAngle < -360f) lfAngle += 360f;
-        if (lfAngle > 360f) lfAngle -= 360f;
-        return Mathf.Clamp(lfAngle, lfMin, lfMax);
-    }
+    
 }
