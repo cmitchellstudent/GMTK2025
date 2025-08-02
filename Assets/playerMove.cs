@@ -53,7 +53,7 @@ public class playerMove : MonoBehaviour
         float mouseX = Mathf.Clamp(lookInput.x * Time.deltaTime, -1, 1) * camSpeed;
         float mouseY = Mathf.Clamp(lookInput.y * Time.deltaTime, -1, 1) * camSpeed;
 
-        Debug.Log(mouseX + " " + mouseY);
+        //Debug.Log(mouseX + " " + mouseY);
         yRotation += mouseX;
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
