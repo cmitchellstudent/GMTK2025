@@ -50,9 +50,10 @@ public class playerMove : MonoBehaviour
     {
         //TODO: MAKE THIS CONTROLLER COMPATIBLE
         Vector2 lookInput = lookActions.ReadValue<Vector2>();
-        float mouseX = lookInput.x * camSpeed * Time.deltaTime;
-        float mouseY = lookInput.y * camSpeed * Time.deltaTime;
+        float mouseX = Mathf.Clamp(lookInput.x * Time.deltaTime, -1, 1) * camSpeed;
+        float mouseY = Mathf.Clamp(lookInput.y * Time.deltaTime, -1, 1) * camSpeed;
 
+        Debug.Log(mouseX + " " + mouseY);
         yRotation += mouseX;
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
