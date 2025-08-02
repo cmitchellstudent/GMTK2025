@@ -11,14 +11,18 @@ public class Inventory : MonoBehaviour
     private InputAction _interactAction;
     
     private GameObject _pickUpBuffer;
-    public GameObject interactIcon;
+    private GameObject _doorBuffer;
+
+    private bool _isLookingAtDoorWithKey;
+    public GameObject iconObj;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         _pickUpBuffer = null;
-        interactIcon.SetActive(false);
+        _isLookingAtDoorWithKey = false;
         //_hitbox = GetComponent<BoxCollider>();
         _interactAction = InputSystem.actions.FindAction("Interact");
+        ClearIcon();
     }
 
     // Update is called once per frame
@@ -26,6 +30,12 @@ public class Inventory : MonoBehaviour
     {
         if (_interactAction.WasPressedThisFrame())
         {
+            if (_isLookingAtDoorWithKey)
+            {
+                Destroy(InventoryHand.transform.GetChild(0).gameObject);
+                _doorBuffer.gameObject.GetComponent<DoorScript>().OpenDoor();
+                OnTriggerExit(_doorBuffer.gameObject.GetComponent<Collider>());
+            }
             if (InventoryHand.transform.childCount > 0)
             {
                 Drop();
@@ -47,7 +57,7 @@ public class Inventory : MonoBehaviour
         _pickUpBuffer.GetComponent<Rigidbody>().isKinematic = true;
         _pickUpBuffer.transform.parent = InventoryHand.transform;
         _pickUpBuffer.transform.position = InventoryHand.transform.position;
-        if (_pickUpBuffer.name.Contains("Key"))
+        if (_pickUpBuffer.name.Contains("Key") || true)
         {
             _pickUpBuffer.transform.localRotation = Quaternion.Euler(0,90,0);
         }
@@ -62,19 +72,53 @@ public class Inventory : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log(other.name);
         if (other.gameObject.CompareTag("Item"))
         {
             _pickUpBuffer = other.gameObject;
-            interactIcon.SetActive(true);
+            SetIcon(Color.blue);
+        }
+        else if (other.gameObject.CompareTag("Door"))
+        {
+            _doorBuffer = other.gameObject;
+            try 
+            {
+                if (InventoryHand.transform.GetChild(0).name.Contains("Key"))
+                {
+                    SetIcon(Color.green);
+                    _isLookingAtDoorWithKey = true;
+                }
+            }
+            catch
+            {
+                SetIcon(Color.red);
+            }
+                
+        }
+        {
+            
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
+        _isLookingAtDoorWithKey = false;
         if (other.gameObject.Equals(_pickUpBuffer))
         {
             _pickUpBuffer = null;
-            interactIcon.SetActive(false);
         }
+        ClearIcon();
+    }
+
+    void SetIcon(Color temp)
+    {
+        iconObj.SetActive(true);
+        Image img = iconObj.GetComponent<Image>();
+        img.color = temp;
+    }
+
+    void ClearIcon()
+    {
+        iconObj.SetActive(false);
     }
 }
