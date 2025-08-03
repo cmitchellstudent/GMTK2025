@@ -4,6 +4,10 @@ using UnityEngine;
 public class CloseHitbox : MonoBehaviour
 {
     public DoorScript door;
+    
+    public GameObject[] roomsToDisable;
+
+    public GameObject[] roomsToEnable;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -21,6 +25,20 @@ public class CloseHitbox : MonoBehaviour
         if (other.gameObject.CompareTag("Player"))
         {
             door.CloseDoor();
+            foreach (var roomToDisable in roomsToDisable)
+            {
+                if (roomToDisable)
+                {
+                    roomToDisable.SetActive(false);
+                }
+            }
+            foreach (var roomToEnable in roomsToEnable)
+            {
+                if (roomToEnable)
+                {
+                    roomToEnable.SetActive(true);
+                }
+            }
         }
     }
 }

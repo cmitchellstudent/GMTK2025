@@ -2,10 +2,16 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class Inventory : MonoBehaviour
 {
     public GameObject InventoryHand;
+    public TaxPuzzle TP;
+
+    public AudioSource pickUpSound;
+    public AudioSource dropSound;
+    
     private BoxCollider _hitbox;
 
     private InputAction _interactAction;
@@ -14,6 +20,7 @@ public class Inventory : MonoBehaviour
     private GameObject _doorBuffer;
 
     private bool _isLookingAtDoorWithKey;
+    private bool _isLookingAtJob;
     public GameObject iconObj;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -30,6 +37,10 @@ public class Inventory : MonoBehaviour
     {
         if (_interactAction.WasPressedThisFrame())
         {
+            if (_isLookingAtJob)
+            {
+                TP.IncrementJob();
+            }
             if (_isLookingAtDoorWithKey)
             {
                 Destroy(InventoryHand.transform.GetChild(0).gameObject);
@@ -54,6 +65,8 @@ public class Inventory : MonoBehaviour
 
     void Pickup()
     {
+        pickUpSound.pitch = Random.Range(90, 110) / 100f;
+        pickUpSound.Play();
         _pickUpBuffer.GetComponent<Rigidbody>().isKinematic = true;
         _pickUpBuffer.transform.parent = InventoryHand.transform;
         _pickUpBuffer.transform.position = InventoryHand.transform.position;
@@ -65,14 +78,17 @@ public class Inventory : MonoBehaviour
 
     void Drop()
     {
+        dropSound.pitch = Random.Range(90, 110) / 100f;
+        dropSound.Play();
         Transform held = InventoryHand.transform.GetChild(0);
+        held.localPosition += (Vector3.left * 0.23f) ;
         held.parent = null;
         held.gameObject.GetComponent<Rigidbody>().isKinematic = false;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other.name);
+        //Debug.Log(other.name);
         if (other.gameObject.CompareTag("Item"))
         {
             _pickUpBuffer = other.gameObject;
@@ -88,6 +104,10 @@ public class Inventory : MonoBehaviour
                     SetIcon(Color.green);
                     _isLookingAtDoorWithKey = true;
                 }
+                else
+                {
+                    SetIcon(Color.red);
+                }
             }
             catch
             {
@@ -95,14 +115,17 @@ public class Inventory : MonoBehaviour
             }
                 
         }
+        else if (other.gameObject.CompareTag("Job"))
         {
-            
+            _isLookingAtJob = true;
+            SetIcon(Color.blue);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
         _isLookingAtDoorWithKey = false;
+        _isLookingAtJob = false;
         if (other.gameObject.Equals(_pickUpBuffer))
         {
             _pickUpBuffer = null;

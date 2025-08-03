@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DoorScript : MonoBehaviour
@@ -6,7 +7,11 @@ public class DoorScript : MonoBehaviour
     public GameObject hinge;
     public float duration;
     public GameObject barrier;
+    public bool isRoom2;
+    public List<GameObject> room2Fakes;
 
+    public AudioSource soundOpen;
+    public AudioSource soundClose;
     private Quaternion _startingRot;
 
     private Quaternion _endingRot;
@@ -14,7 +19,7 @@ public class DoorScript : MonoBehaviour
     private bool _isOpen;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
         _isOpen = false;
         barrier.SetActive(false);
@@ -33,7 +38,15 @@ public class DoorScript : MonoBehaviour
         //changing tag will cease interaction.
         gameObject.tag = "Untagged";
         _isOpen = true;
+        barrier.SetActive(false);
         StartCoroutine(OpenAnim());
+        if (isRoom2)
+        {
+            foreach (var obj in room2Fakes)
+            {
+                obj.tag = "Untagged";
+            }
+        }
     }
 
     public void CloseDoor()
@@ -48,6 +61,7 @@ public class DoorScript : MonoBehaviour
 
     IEnumerator OpenAnim()
     {
+        soundOpen.Play();
         _timer = 0;
         while (_timer < duration)
         {
@@ -60,6 +74,7 @@ public class DoorScript : MonoBehaviour
     }
     IEnumerator CloseAnim()
     {
+        soundClose.Play();
         _timer = 0;
         while (_timer < duration)
         {

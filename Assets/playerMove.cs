@@ -1,8 +1,10 @@
 
 using System;
+using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Random = UnityEngine.Random;
 
 public class playerMove : MonoBehaviour
 {
@@ -13,6 +15,10 @@ public class playerMove : MonoBehaviour
     InputAction lookActions;
     private float camSpeed;
     public float moveSpeed;
+
+    public AudioSource[] footsteps;
+    private bool _isPlayingSound;
+    
 
     private float xRotation;
     private float yRotation;
@@ -39,6 +45,10 @@ public class playerMove : MonoBehaviour
         player.Move(move * (moveSpeed * Time.deltaTime));
         //le gravity
         player.Move(Vector3.down * (10 * Time.deltaTime));
+        if (move != Vector3.zero)
+        {
+            PlayFootStep();
+        } 
     }
 
     private void LateUpdate()
@@ -61,5 +71,23 @@ public class playerMove : MonoBehaviour
         transform.rotation = Quaternion.Euler(xRotation,yRotation,0);
         orientation.rotation = Quaternion.Euler(0, yRotation, 0);
     }
-    
+
+    void PlayFootStep()
+    {
+        if (!_isPlayingSound)
+        {
+            var index = Random.Range(0, 3);
+            _isPlayingSound = true;
+            var clip = footsteps[index];
+            clip.pitch = Random.Range(90, 110) / 100f;
+            clip.Play();
+            StartCoroutine(WaitForEnd(clip.clip.length));
+        }
+    }
+    IEnumerator WaitForEnd(float length)
+    {
+        yield return new WaitForSeconds(length);
+        _isPlayingSound = false;
+        yield return null;
+    }
 }
